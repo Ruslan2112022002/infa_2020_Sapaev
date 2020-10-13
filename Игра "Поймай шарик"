@@ -1,0 +1,202 @@
+import pygame
+import math
+from pygame.draw import *
+from random import randint
+pygame.init()
+
+FPS = 30
+screen = pygame.display.set_mode((1200, 900))
+
+'''Инициализация цветов'''
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+GREEN = (0, 255, 0)
+MAGENTA = (255, 0, 255)
+CYAN = (0, 255, 255)
+BLACK = (0, 0, 0)
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+
+class ball:
+    '''
+    Класс кружок
+    x - Координата x 
+    y - координата y
+    r - радиус кружка
+    color - цвет круга
+    vel_x - скорость круга по x
+    vel_y - скорость круга по y
+    ''' 
+    def draw(self):
+        '''
+        метод отрисовывает круг с заданными координатами, радиусом и цветом
+        '''
+        circle(screen, self.color, (self.x, self.y), self.r)
+   
+    def click(self, pos):
+        '''
+        метод определяет попадание клика по шарику
+        pos - кортеж из двух значений, первое - координата по x, второе - по y
+        '''
+        distant = ((pos[0] - self.x) ** 2 + (pos[1] - self.y) ** 2) ** 0.5
+        if distant <= self.r:
+            return(True)
+        else:
+            return(False)
+    
+    def move(self):
+        '''
+        метод пересчитывает новые координаты круга, по заданным скоростям и начальному положению.
+        '''
+        self.x += round(self.vel_x / FPS)
+        self.y += round(self.vel_y / FPS)
+        if (self.x >= 1200 - self.r):
+            self.vel_x *= -1
+            self.x = 1200 - self.r - (self.x - 1200 + self.r)
+        if (self.y >= 900 - self.r):
+            self.vel_y *= -1
+            self.y = 900 - self.r - (self.y - 900 + self.r)
+        if (self.x <= self.r):
+            self.vel_x *= -1
+            self.x = self.r + self.r - self.x
+        if (self.y <= self.r):
+            self.vel_y *= -1
+            self.y = self.r + self.r - self.y
+            
+    def redefine(self):
+        '''
+        повторная инициализация круга нужная для создания нового шара при поподании по старому или при певрой инициализации
+        '''
+        self.x = x = randint(100,1100)
+        self.y = randint(100,800)
+        self.r = randint(30,50)
+        self.color = COLORS[randint(0, 5)]
+        self.abs_v = randint(50, 150)
+        self.angle = randint(0, 360)
+        self.vel_x = self.abs_v * math.cos(self.angle)
+        self.vel_y = self.abs_v * math.sin(self.angle)
+
+        
+class square:
+    '''
+    Класс ромбик
+    x - Координата x 
+    y - координата y
+    r - радиус кружк
+    color - цвет круга
+    vel_x - скорость круга по x
+    vel_y - скорость круга по y
+    '''
+    def draw(self):
+        '''
+        метод отрисовывает ромб с заданными координатами, радиусом и цветом
+        '''
+        polygon(screen, self.color, [(self.x, self.y + self.r), (self.x + self.r, self.y ), 
+                                     (self.x, self.y - self.r), (self.x - self.r, self.y)])
+   
+    def click(self, pos):
+        '''
+        метод определяет попадание клика по ромбику
+        pos - кортеж из двух значений, первое - координата по x, второе - по y
+        '''
+        distant = abs(self.x - pos[0]) + abs(self.y - pos[1])
+        if distant <= self.r:
+            return(True)
+        else:
+            return(False)
+    
+    def move(self):
+        '''
+        метод пересчитывает новые координаты круга, по заданным скоростям и начальному положению.
+        при каждом пересчете координат скорость ромба меняется на случайное значение от -15, до 15 по каждой из осей
+        '''
+        self.x += round(self.vel_x / FPS)
+        self.y += round(self.vel_y / FPS)
+        self.vel_x += randint(0, 30) - 15
+        self.vel_y += randint(0, 20) - 15
+        if (self.x >= 1200 - self.r):
+            self.vel_x *= -1
+            self.x = 1200 - self.r - (self.x - 1200 + self.r)
+        if (self.y >= 900 - self.r):
+            self.vel_y *= -1
+            self.y = 900 - self.r - (self.y - 900 + self.r)
+        if (self.x <= self.r):
+            self.vel_x *= -1
+            self.x = self.r + self.r - self.x
+        if (self.y <= self.r):
+            self.vel_y *= -1
+            self.y = self.r + self.r - self.y
+        
+            
+    def redefine(self):
+        '''
+        повторная инициализация ромба нужная для создания нового шара при поподании по старому или при певрой инициализации
+        '''
+        self.x = x = randint(100,1100)
+        self.y = randint(100,800)
+        self.r = randint(5, 15)
+        self.color = COLORS[randint(0, 5)]
+        self.abs_v = randint(50, 150)
+        self.angle = randint(0, 360)
+        self.vel_x = self.abs_v * math.cos(self.angle)
+        self.vel_y = self.abs_v * math.sin(self.angle)
+    
+pygame.display.update()
+clock = pygame.time.Clock()
+finished = False
+score_counter = 0
+missing_counter = 0
+#Инициализация трех объектов типа ball и одного типа square
+a = ball()
+b = ball()
+c = ball()
+d = square()
+a.redefine()
+b.redefine()
+c.redefine()
+d.redefine()
+
+#Осное тело программы
+while not finished:
+    clock.tick(FPS)
+   
+    a.draw()
+    b.draw()
+    c.draw()
+    d.draw()
+    
+    for event in pygame.event.get():
+        #диспетчерезация нажатых кнопок
+        if event.type == pygame.QUIT:
+            finished = True
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if a.click(event.pos) == True:
+                score_counter += 1
+                a.redefine()
+                d.redefine()
+            elif b.click(event.pos) == True:
+                score_counter += 1
+                b.redefine()
+                d.redefine()
+            elif c.click(event.pos) == True:
+                score_counter += 1
+                c.redefine() 
+                d.redefine()
+            elif d.click(event.pos) == True:
+                score_counter += 10
+                d.redefine()   
+            else:
+                missing_counter += 1
+                d.redefine()
+    
+    a.move()
+    b.move()
+    c.move()
+    d.move()
+    
+    pygame.display.update()
+    screen.fill(BLACK)
+
+pygame.quit()
+
+print ('your final score is:', score_counter)
